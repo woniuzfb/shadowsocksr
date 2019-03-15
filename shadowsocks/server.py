@@ -68,6 +68,7 @@ def main():
 
     tcp_servers = []
     udp_servers = []
+    
     dns_resolver = asyncdns.DNSResolver()
     if int(config['workers']) > 1:
         stat_counter_dict = None
@@ -198,8 +199,8 @@ def main():
                 # master
                 for a_tcp_server in tcp_servers:
                     a_tcp_server.close()
-                for a_udp_server in udp_servers:
-                    a_udp_server.close()
+                #for a_udp_server in udp_servers:
+                #    a_udp_server.close()
                 dns_resolver.close()
 
                 for child in children:

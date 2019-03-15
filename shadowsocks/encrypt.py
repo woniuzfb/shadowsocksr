@@ -22,6 +22,11 @@ import sys
 import hashlib
 import logging
 
+if __name__ == '__main__':
+    import inspect
+    file_path = os.path.dirname(os.path.realpath(inspect.getfile(inspect.currentframe())))
+    sys.path.insert(0, os.path.join(file_path, '../'))
+
 from shadowsocks import common
 from shadowsocks.crypto import rc4_md5, openssl, sodium, table
 
@@ -213,7 +218,6 @@ def test_encryptor():
     from os import urandom
     plain = urandom(10240)
     for method in CIPHERS_TO_TEST:
-        logging.warn(method)
         encryptor = Encryptor(b'key', method)
         decryptor = Encryptor(b'key', method)
         cipher = encryptor.encrypt(plain)
@@ -232,5 +236,5 @@ def test_encrypt_all():
 
 
 if __name__ == '__main__':
-    test_encrypt_all()
+    #test_encrypt_all()
     test_encryptor()
