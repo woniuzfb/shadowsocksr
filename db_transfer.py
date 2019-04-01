@@ -202,9 +202,7 @@ class TransferBase(object):
 		protocol = cfg.get('protocol', ServerPool.get_instance().config.get('protocol', 'origin'))
 		method = cfg.get('method', ServerPool.get_instance().config.get('method', 'None'))
 		obfs = cfg.get('obfs', ServerPool.get_instance().config.get('obfs', 'plain'))
-		obfs_param = cfg.get('obfs_param', ServerPool.get_instance().config.get('obfs_param', ''))
-		protocol_param = cfg.get('protocol_param', ServerPool.get_instance().config.get('protocol_param', ''))
-		logging.info('db start server at port [%s] pass [%s] protocol [%s] method [%s] obfs [%s] obfs_param [%s] protocol_param [%s]' % (port, passwd, protocol, method, obfs, obfs_param, protocol_param))
+		logging.info('db start server at port [%s] pass [%s] protocol [%s] method [%s] obfs [%s]' % (port, passwd, protocol, method, obfs))
 		ServerPool.get_instance().new_server(port, cfg)
 
 	def cmp(self, val1, val2):

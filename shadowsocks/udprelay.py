@@ -165,8 +165,8 @@ class UDPRelay(object):
         if common.to_bytes(config['protocol']) in obfs.mu_protocol():
             self._update_users(None, None)
 
-        self.protocol_data = obfs.obfs(config['protocol']).get_obfs().init_data()
-        self._protocol = obfs.obfs(config['protocol']).get_obfs()
+        self.protocol_data = obfs.obfs(config['protocol']).init_data()
+        self._protocol = obfs.obfs(config['protocol'])
         server_info = obfs.server_info(self.protocol_data)
         server_info.host = self._listen_addr
         server_info.port = self._listen_port
@@ -352,12 +352,12 @@ class UDPRelay(object):
                 data = data[3:]
         else:
             ref_iv = [0]
-            data = encrypt.encrypt_all_iv(self._protocol.server_info.key, self._method, 0, data, ref_iv)
+            data = encrypt.encrypt_all_iv(self._protocol.obfs.server_info.key, self._method, 0, data, ref_iv)
             # decrypt data
             if not data:
                 logging.debug('UDP handle_server: data is empty after decrypt')
                 return
-            self._protocol.server_info.recv_iv = ref_iv[0]
+            self._protocol.obfs.server_info.recv_iv = ref_iv[0]
             data, uid = self._protocol.server_udp_post_decrypt(data)
 
         #logging.info("UDP data %s" % (binascii.hexlify(data),))
@@ -451,10 +451,10 @@ class UDPRelay(object):
 
             if self._is_local:
                 ref_iv = [encrypt.encrypt_new_iv(self._method)]
-                self._protocol.server_info.iv = ref_iv[0]
+                self._protocol.obfs.server_info.iv = ref_iv[0]
                 data = self._protocol.client_udp_pre_encrypt(data)
                 #logging.debug("%s" % (binascii.hexlify(data),))
-                data = encrypt.encrypt_all_iv(self._protocol.server_info.key, self._method, 1, data, ref_iv)
+                data = encrypt.encrypt_all_iv(self._protocol.obfs.server_info.key, self._method, 1, data, ref_iv)
                 if not data:
                     return
             else:
@@ -506,19 +506,19 @@ class UDPRelay(object):
                 return
             data = pack_addr(r_addr[0]) + struct.pack('>H', r_addr[1]) + data
             ref_iv = [encrypt.encrypt_new_iv(self._method)]
-            self._protocol.server_info.iv = ref_iv[0]
+            self._protocol.obfs.server_info.iv = ref_iv[0]
             data = self._protocol.server_udp_pre_encrypt(data, client_uid)
-            response = encrypt.encrypt_all_iv(self._protocol.server_info.key, self._method, 1,
+            response = encrypt.encrypt_all_iv(self._protocol.obfs.server_info.key, self._method, 1,
                                            data, ref_iv)
             if not response:
                 return
         else:
             ref_iv = [0]
-            data = encrypt.encrypt_all_iv(self._protocol.server_info.key, self._method, 0,
+            data = encrypt.encrypt_all_iv(self._protocol.obfs.server_info.key, self._method, 0,
                                        data, ref_iv)
             if not data:
                 return
-            self._protocol.server_info.recv_iv = ref_iv[0]
+            self._protocol.obfs.server_info.recv_iv = ref_iv[0]
             data = self._protocol.client_udp_post_decrypt(data)
             header_result = parse_header(data)
             if header_result is None:
@@ -599,7 +599,6 @@ class UDPRelay(object):
         client.destroy_local()
 
     def handle_event(self, sock, fd, event):
-        logging.info("...............udp..........")
         if sock == self._server_socket:
             if event & eventloop.POLL_ERR:
                 logging.error('UDP server_socket err')
